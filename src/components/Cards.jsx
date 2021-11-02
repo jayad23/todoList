@@ -10,7 +10,7 @@ const Cards = ({title, id, status, handlerStatus})=>{
                 </div>
                 <div className="cardButton">
                     <button 
-                        onClick={()=> handlerStatus(id)}
+                        onClick={()=> handlerStatus(id, status)}
                         className={status ? 'completed' : 'unCompleted'}>{status ? 'Completed' : 'Pending'}
                     </button>
                 </div>

@@ -12,7 +12,7 @@ function App() {
   const [renderTasks, setRenderTasks] = useState(null)
   const [totalTasksComplete, setTotalTasksComplete] = useState(0)
   const [totalTasksNotComplete, setTotalTasksNotComplete] = useState(0)
-
+  const [ filterStatus, setFilterStatus] = useState(null)
   //INITIAL API REQUEST
   useEffect(() =>{
     const requestApi = async () =>{
@@ -28,13 +28,14 @@ function App() {
 
   //FUNCTIONS
   // A. Changing state true/false
-  const settingStatus = (id)=>{
+  const settingStatus = (id, status)=>{
     setDataApi(dataApi.map(data =>(
       data.id === id ? {...data, completed:!data.completed}: data
     )))
     setRenderTasks(renderTasks.map(data =>(
       data.id === id ? {...data, completed:!data.completed}: data
     )))
+    setFilterStatus(status)
   }
 
   // B. Header Buttons Filter
@@ -49,6 +50,10 @@ function App() {
       
   }
   
+  useEffect(() => {
+    handlerRenderTasks(filterStatus)
+  }, [dataApi])
+
   // HEADER COUNTER BASE & UPDATED VALUES
   useEffect(()=>{
     const countersOnHeader = ()=>{
