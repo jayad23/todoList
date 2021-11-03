@@ -9,10 +9,11 @@ import './styles/Cards.css';
 function App() {
   //STATES
   const [dataApi, setDataApi] = useState([])
-  const [renderTasks, setRenderTasks] = useState(null)
+  const [renderTasksComplete, setRenderTasksComplete] = useState([])
+  const [renderTasksUncomplete, setRenderTasksUncomplete] = useState([])
   const [totalTasksComplete, setTotalTasksComplete] = useState(0)
   const [totalTasksNotComplete, setTotalTasksNotComplete] = useState(0)
-  const [ filterStatus, setFilterStatus] = useState(null)
+  const [ filterStatus, setFilterStatus] = useState(undefined)
   //INITIAL API REQUEST
   useEffect(() =>{
     const requestApi = async () =>{
@@ -21,47 +22,80 @@ function App() {
       const result = await response.json()
       const selected = result.slice(0, 34)
       setDataApi(selected)
-      setRenderTasks(selected)  
+      setFilterStatus('all')
     }
     requestApi()
   }, [])
 
   //FUNCTIONS
   // A. Changing state true/false
-  const settingStatus = (id, status)=>{
+  const settingStatus = (id)=>{
     setDataApi(dataApi.map(data =>(
       data.id === id ? {...data, completed:!data.completed}: data
     )))
-    setRenderTasks(renderTasks.map(data =>(
-      data.id === id ? {...data, completed:!data.completed}: data
-    )))
-    setFilterStatus(status)
   }
 
   // B. Header Buttons Filter
   const handlerRenderTasks = (value) =>{
-      if(value === null){
-        setRenderTasks(dataApi)
-      } else if (value === true){
-        setRenderTasks(dataApi.filter(data => data.completed === true))
-      } else if(value === false){
-        setRenderTasks(dataApi.filter(data => data.completed === false))
-      }
+    if (value === null){
+      setFilterStatus('all')
+    } else if (value === true){
+      setFilterStatus('complete')
+    } else if(value === false){
+      setFilterStatus('unComplete')
+    }
       
   }
-  
-  useEffect(() => {
-    handlerRenderTasks(filterStatus)
-  }, [dataApi])
+
+  const printing = ()=>{
+    if(filterStatus === 'all'){
+      return (
+        dataApi.map(data =>
+          <Cards
+            key={data.id}
+            title={data.title}
+            id={data.id}  
+            status={data.completed}
+            handlerStatus={settingStatus}
+          />
+        )
+      )
+    }else if(filterStatus === 'complete'){
+      return(
+        renderTasksComplete.map(data =>
+          <Cards
+            key={data.id}
+            title={data.title}
+            id={data.id}  
+            status={data.completed}
+            handlerStatus={settingStatus}
+          />
+        )
+      )
+    } else if(filterStatus === 'unComplete'){
+      return(
+        renderTasksUncomplete.map(data =>
+          <Cards
+            key={data.id}
+            title={data.title}
+            id={data.id}  
+            status={data.completed}
+            handlerStatus={settingStatus}
+          />
+        )
+      )
+    }
+  }
 
   // HEADER COUNTER BASE & UPDATED VALUES
   useEffect(()=>{
     const countersOnHeader = ()=>{
       const completeTask = dataApi.filter(data => data.completed === true)
       setTotalTasksComplete(completeTask.length)
-
+      setRenderTasksComplete(completeTask)
       const notCompleteTasks = dataApi.filter(data => data.completed === false)
       setTotalTasksNotComplete(notCompleteTasks.length)
+      setRenderTasksUncomplete(notCompleteTasks)
     }
     countersOnHeader()
   } )
@@ -79,16 +113,9 @@ function App() {
       </>
       <div className="cardsContainer">
         {
-          renderTasks && renderTasks.length > 0 ?
-          renderTasks.map(data =>
-            <Cards
-              key={data.id}
-              title={data.title}
-              id={data.id}  
-              status={data.completed}
-              handlerStatus={settingStatus}
-            />
-          ):<Loader/>
+          dataApi && dataApi.length > 0 ?
+            printing()
+          :<Loader/>
         }
       </div>
     </div>
